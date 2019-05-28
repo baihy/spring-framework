@@ -1731,12 +1731,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param mbd      the bean definition that the bean was created with
      *                 (can also be {@code null}, if given an existing bean instance)
      * @return the initialized bean instance (potentially wrapped)
-     * @see BeanNameAware
-     * @see BeanClassLoaderAware
-     * @see BeanFactoryAware
-     * @see #applyBeanPostProcessorsBeforeInitialization
-     * @see #invokeInitMethods
-     * @see #applyBeanPostProcessorsAfterInitialization
+     *
+     *  初始化bean的信息
+     *
      */
     protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) {
         if (System.getSecurityManager() != null) {
@@ -1757,7 +1754,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
         try {
-            //反射调用初始化方法
+            // 两种初始化方法：1.通过init-method属性或注解指定初始化方法，或者实现InitializingBean接口，重写afterPropertiesSet方法
             invokeInitMethods(beanName, wrappedBean, mbd);
         } catch (Throwable ex) {
             throw new BeanCreationException(
@@ -1809,9 +1806,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (logger.isTraceEnabled()) {
                 logger.trace("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
             }
+            // 基于Spring的安全管理
             if (System.getSecurityManager() != null) {
                 try {
                     AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+                        // 调用afterPropertiesSet方法，进行初始化
                         ((InitializingBean) bean).afterPropertiesSet();
                         return null;
                     }, getAccessControlContext());
@@ -1819,11 +1818,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     throw pae.getException();
                 }
             } else {
+                // 调用afterPropertiesSet方法，进行初始化
                 ((InitializingBean) bean).afterPropertiesSet();
             }
         }
 
         if (mbd != null && bean.getClass() != NullBean.class) {
+            // 获取init-method方法，反射调用自己定义的init-method方法
             String initMethodName = mbd.getInitMethodName();
             if (StringUtils.hasLength(initMethodName) &&
                     !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
@@ -1875,6 +1876,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             });
             try {
                 AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+                        // 反射调用
                         initMethod.invoke(bean), getAccessControlContext());
             } catch (PrivilegedActionException pae) {
                 InvocationTargetException ex = (InvocationTargetException) pae.getException();
