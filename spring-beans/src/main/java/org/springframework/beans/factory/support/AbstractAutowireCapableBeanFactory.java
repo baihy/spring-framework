@@ -1275,6 +1275,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             }
             // 给beanInstance对象，包一层
             BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+            // 初始化bean的时候，就会调用属性编辑器（包括内置的和自定义的）。
             initBeanWrapper(bw);
             return bw;
         } catch (Throwable ex) {

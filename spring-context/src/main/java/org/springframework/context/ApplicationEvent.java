@@ -37,9 +37,10 @@ public abstract class ApplicationEvent extends EventObject {
 	/**
 	 * Create a new ApplicationEvent.
 	 * @param source the object on which the event initially occurred (never {@code null})
+	 *               这个对象是最先发生事件的对象
 	 */
 	public ApplicationEvent(Object source) {
-		super(source);
+		super(source);// 就是发生事件的对象。就是事件那个对象被发布，一般传this即可
 		this.timestamp = System.currentTimeMillis();
 	}
 
