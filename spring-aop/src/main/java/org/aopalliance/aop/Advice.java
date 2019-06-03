@@ -24,5 +24,7 @@ package org.aopalliance.aop;
  * @version $Id: Advice.java,v 1.1 2004/03/19 17:02:16 johnsonr Exp $
  */
 public interface Advice {
-
+    /**
+     * 增强器标记接口
+     */
 }

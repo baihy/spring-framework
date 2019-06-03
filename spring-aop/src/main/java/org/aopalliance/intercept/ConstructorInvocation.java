@@ -29,7 +29,7 @@ import java.lang.reflect.Constructor;
  * @see ConstructorInterceptor
  */
 public interface ConstructorInvocation extends Invocation {
-
+	// Invocation的子类，包含了获取构造器的方法。
 	/**
 	 * Get the constructor being called.
 	 * <p>This method is a friendly implementation of the

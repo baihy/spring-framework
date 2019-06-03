@@ -57,6 +57,7 @@ public interface BeanPostProcessor {
 	 */
 	@Nullable
 	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		// 这个bean是在bean初始化之前被调用
 		return bean;
 	}
 
@@ -83,6 +84,7 @@ public interface BeanPostProcessor {
 	 */
 	@Nullable
 	default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		// 创建bean对象之后，调用init-method方法之前调用
 		return bean;
 	}
 

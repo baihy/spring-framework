@@ -42,7 +42,7 @@ package org.aopalliance.intercept;
  * @author Rod Johnson
  */
 public interface ConstructorInterceptor extends Interceptor  {
-
+	// 构造器拦截器，Interceptor的子接口，拦截构造器并处理。
 	/**
 	 * Implement this method to perform extra treatments before and
 	 * after the construction of a new object. Polite implementations

@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
  * @see MethodInterceptor
  */
 public interface MethodInvocation extends Invocation {
-
+	// Invocation的子类，包含了获取调用方法的方法
 	/**
 	 * Get the method being called.
 	 * <p>This method is a friendly implementation of the

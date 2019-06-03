@@ -38,7 +38,7 @@ import java.lang.reflect.AccessibleObject;
  * @see Interceptor
  */
 public interface Joinpoint {
-
+	//连接点。在拦截器中使用，封装了原方法调用的相关信息，如参数、原对象信息，以及直接调用原方法的proceed方法
 	/**
 	 * Proceed to the next interceptor in the chain.
 	 * <p>The implementation and the semantics of this method depends

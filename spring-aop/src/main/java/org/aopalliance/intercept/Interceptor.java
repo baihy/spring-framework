@@ -55,5 +55,5 @@ import org.aopalliance.aop.Advice;
  * @see Joinpoint
  */
 public interface Interceptor extends Advice {
-
+    //拦截器，Advice的子接口，标记拦截器。拦截器是增强器的一种。
 }

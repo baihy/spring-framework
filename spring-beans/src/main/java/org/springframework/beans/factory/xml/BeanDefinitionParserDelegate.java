@@ -1294,7 +1294,7 @@ public class BeanDefinitionParserDelegate {
         if (namespaceUri == null) {
             return null;
         }
-        // 根据命名空间，获取命名空间解析器
+        // 根据命名空间，获取命名空间解析器   在解析的时候，会调用init方法，初始化标签
         NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
         if (handler == null) {
             error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
@@ -1392,6 +1392,7 @@ public class BeanDefinitionParserDelegate {
      * different mechanism for getting the local name.
      *
      * @param node the {@code Node}
+     *             获取节点名称
      */
     public String getLocalName(Node node) {
         return node.getLocalName();
