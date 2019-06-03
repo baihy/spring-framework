@@ -1300,6 +1300,7 @@ public class BeanDefinitionParserDelegate {
             error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
             return null;
         }
+        // 命名空间的作用就是调用命名空间的解析器中的parse方法。
         return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
     }
 
