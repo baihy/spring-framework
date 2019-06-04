@@ -16,13 +16,13 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.lang.Nullable;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
-
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.lang.Nullable;
 
 /**
  * Simple adapter for {@link PreparedStatementSetter} that applies
@@ -55,7 +55,7 @@ public class ArgumentTypePreparedStatementSetter implements PreparedStatementSet
 	}
 
 
-	@Override
+	@Override  // 对预编译sql中的问号进行赋值
 	public void setValues(PreparedStatement ps) throws SQLException {
 		int parameterPosition = 1;
 		if (this.args != null && this.argTypes != null) {
