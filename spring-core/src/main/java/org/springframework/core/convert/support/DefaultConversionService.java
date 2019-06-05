@@ -16,14 +16,14 @@
 
 package org.springframework.core.convert.support;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.lang.Nullable;
+
 import java.nio.charset.Charset;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
-
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.lang.Nullable;
 
 /**
  * A specialization of {@link GenericConversionService} configured by default
@@ -70,6 +70,7 @@ public class DefaultConversionService extends GenericConversionService {
 			synchronized (DefaultConversionService.class) {
 				cs = sharedInstance;
 				if (cs == null) {
+					// 返回默认的转换器
 					cs = new DefaultConversionService();
 					sharedInstance = cs;
 				}

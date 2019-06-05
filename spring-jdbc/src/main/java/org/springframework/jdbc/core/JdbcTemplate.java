@@ -412,6 +412,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         execute(new ExecuteStatementCallback());
     }
 
+    // 注意：
     @Override
     @Nullable
     public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
@@ -426,7 +427,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
          */
         class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
             @Override
-            @Nullable
+            @Nullable  // 这里为什么要用Statement对象，因为PreparedStatement对in操作支持不好。
             public T doInStatement(Statement stmt) throws SQLException {
                 ResultSet rs = null;
                 try {
@@ -451,6 +452,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         query(sql, new RowCallbackHandlerResultSetExtractor(rch));
     }
 
+    ///////////注意：这种方式有参数的处理方式是不同////////////////
     @Override
     public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
         return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper)));
@@ -471,7 +473,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     @Override
     @Nullable
     public <T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException {
-        return queryForObject(sql, getSingleColumnRowMapper(requiredType));
+        RowMapper<T> singleColumnRowMapper = getSingleColumnRowMapper(requiredType);
+        return queryForObject(sql, singleColumnRowMapper);
     }
 
     @Override
@@ -660,7 +663,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
         Assert.notNull(rse, "ResultSetExtractor must not be null");
         logger.debug("Executing prepared SQL query");
-
+        // PreparedStatementCallback 处理查询的回调方法
         return execute(psc, new PreparedStatementCallback<T>() {
             @Override
             @Nullable
@@ -671,6 +674,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
                         pss.setValues(ps);
                     }
                     rs = ps.executeQuery();
+                    // 处理ResultSet对象，将ResultSet对象转换成具体的pojo对象
                     return rse.extractData(rs);
                 } finally {
                     JdbcUtils.closeResultSet(rs);
@@ -691,12 +695,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     @Override
     @Nullable
     public <T> T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
+        // 同样对sql语句进行包装
         return query(new SimplePreparedStatementCreator(sql), pss, rse);
     }
 
     @Override
     @Nullable
     public <T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
+        // 和update方法一样，使用了newArgTypePreparedStatementSetter设置sql预编译的参数
         return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
     }
 
@@ -747,6 +753,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         return result(query(sql, pss, new RowMapperResultSetExtractor<>(rowMapper)));
     }
 
+    //////////////////////////////执行查询的核心方法//////////////////////////////////
     @Override
     public <T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper) throws DataAccessException {
         return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
@@ -852,8 +859,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
             throws DataAccessException {
 
         logger.debug("Executing prepared SQL update");
-
-        return updateCount(execute(psc, ps -> {
+        // PreparedStatementCallback回调函数
+        PreparedStatementCallback<Integer> action = ps -> {
             try {
                 if (pss != null) {
                     // 对sql语句中的问号，进行赋值
@@ -869,7 +876,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
                     ((ParameterDisposer) pss).cleanupParameters();
                 }
             }
-        }));
+        };
+        return updateCount(execute(psc, action));
     }
 
     @Override
