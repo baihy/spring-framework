@@ -116,8 +116,6 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
             // 如果结果数不是1，那么就会报异常
             throw new IncorrectResultSetColumnCountException(1, nrOfColumns);
         }
-
-        // Extract column value from JDBC ResultSet.
         // 抽取出第一个结果，进行处理
         Object result = getColumnValue(rs, 1, this.requiredType);
         if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
