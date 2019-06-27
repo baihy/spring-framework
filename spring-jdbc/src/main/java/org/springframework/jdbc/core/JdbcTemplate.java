@@ -87,6 +87,10 @@ import java.util.*;
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
+    /**
+     *  当前这个类需要注入一个数据源。
+     */
+
     private static final String RETURN_RESULT_SET_PREFIX = "#result-set-";
 
     private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
@@ -366,6 +370,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         Connection con = DataSourceUtils.getConnection(obtainDataSource());
         Statement stmt = null;
         try {
+            //直接通过connection对象来创建Statement对象
             stmt = con.createStatement();
             applyStatementSettings(stmt);
             T result = action.doInStatement(stmt);
@@ -603,9 +608,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
             String sql = getSql(psc);
             logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
         }
-
+        // 获取一个数据源
+        DataSource dataSource = obtainDataSource();
         // 获取数据库连接
-        Connection con = DataSourceUtils.getConnection(obtainDataSource());
+        // 获取数据库连接只要考虑的是关于事务方面的处理，基于事务处理的特殊性，spring需要保证线程中的数据库操作是使用同一个事务连接。
+        Connection con = DataSourceUtils.getConnection(dataSource);
         PreparedStatement ps = null;
         try {
             // 创建sql预执行器
@@ -855,6 +862,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         return result(query(sql, args, new SqlRowSetResultSetExtractor()));
     }
 
+    // 在这个方法之前，需要对sql和参数都需要进行封装。
     protected int update(final PreparedStatementCreator psc, @Nullable final PreparedStatementSetter pss)
             throws DataAccessException {
 
@@ -877,7 +885,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
                 }
             }
         };
-        return updateCount(execute(psc, action));
+        //  execute方法是基础方法，只需要传入不同的PreparedStatementCallback即可
+        Integer execute = execute(psc, action);
+        return updateCount(execute);
     }
 
     @Override
