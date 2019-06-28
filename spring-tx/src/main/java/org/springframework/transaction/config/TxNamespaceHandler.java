@@ -39,6 +39,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
+	// 事务标签的命名空间解析器
+
 	static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
 
 	static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
@@ -54,7 +56,9 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 	public void init() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
+		// 当遇到<tx:annotation-driven />标签时，就会被使用这个类进行解析
 		registerBeanDefinitionParser("jta-transaction-manager", new JtaTransactionManagerBeanDefinitionParser());
+		// jta使用的就是分布式事务
 	}
 
 }
