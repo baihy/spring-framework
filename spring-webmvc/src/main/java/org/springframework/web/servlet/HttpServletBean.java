@@ -16,22 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
+import org.springframework.beans.*;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -45,6 +32,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.context.support.StandardServletEnvironment;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
@@ -148,12 +142,15 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
+		// 解析init-param标签并把这个标签封装到pvs中。
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// 作用是将当前的Servlet对象包装成BeanWrapper对象
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
+				// 这个也是空方法留给子类来实现的。
 				initBeanWrapper(bw);
 				bw.setPropertyValues(pvs, true);
 			}
@@ -164,8 +161,8 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				throw ex;
 			}
 		}
-
 		// Let subclasses do whatever initialization they like.
+		// 空放方法留给子类进行实现的。
 		initServletBean();
 	}
 
@@ -204,6 +201,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 	/**
 	 * PropertyValues implementation created from ServletConfig init parameters.
+	 * 这个类的作用就是封装和验证初始化参数。
 	 */
 	private static class ServletConfigPropertyValues extends MutablePropertyValues {
 
@@ -217,13 +215,18 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 				throws ServletException {
 
+			// 判断Servlet初始化化时，需要的必须属性
 			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
 
+
+
+			// 通过ServletConfig对象获取所有的init-param标签
 			Enumeration<String> paramNames = config.getInitParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String property = paramNames.nextElement();
 				Object value = config.getInitParameter(property);
+				// 把init-param标签的内容放入
 				addPropertyValue(new PropertyValue(property, value));
 				if (missingProps != null) {
 					missingProps.remove(property);
@@ -231,6 +234,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 			}
 
 			// Fail if we are still missing properties.
+			// 如果缺失了指定的属性，就会报错。
 			if (!CollectionUtils.isEmpty(missingProps)) {
 				throw new ServletException(
 						"Initialization from ServletConfig for servlet '" + config.getServletName() +

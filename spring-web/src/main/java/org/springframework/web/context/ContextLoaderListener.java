@@ -37,6 +37,8 @@ import javax.servlet.ServletContextListener;
  */
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
+	// 这个类的作用就是通过ServletContext对象，监听系统启动，实现初始化ApplicationContext对象。
+
 	/**
 	 * Create a new {@code ContextLoaderListener} that will create a web application
 	 * context based on the "contextClass" and "contextConfigLocation" servlet

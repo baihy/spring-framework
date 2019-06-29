@@ -16,20 +16,12 @@
 
 package org.springframework.beans;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * The default implementation of the {@link PropertyValues} interface.
@@ -186,7 +178,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * a property name and a property value.
 	 * <p>Note: As of Spring 3.0, we recommend using the more concise
 	 * and chaining-capable variant {@link #add}.
-	 * @param propertyName name of the property
+	 * @param properaddPropertyValuetyName name of the property
 	 * @param propertyValue value of the property
 	 * @see #addPropertyValue(PropertyValue)
 	 */
