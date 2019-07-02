@@ -672,7 +672,7 @@ public class DispatcherServlet extends FrameworkServlet {
      * Initialize the HandlerAdapters used by this class.
      * <p>If no HandlerAdapter beans are defined in the BeanFactory for this namespace,
      * we default to SimpleControllerHandlerAdapter.
-     * 初始化处理器适配器
+     * 初始化处理器适配器， 类似于handlerMapping的初始化
      */
     private void initHandlerAdapters(ApplicationContext context) {
         this.handlerAdapters = null;
@@ -1052,17 +1052,21 @@ public class DispatcherServlet extends FrameworkServlet {
             Exception dispatchException = null;
 
             try {
+                // 如果是MultipartContent类型的request则转换request为MultipartHttpServletRequest类型的request
                 processedRequest = checkMultipart(request);
+                // 判断经过Multipart处理的请求，是否发生了改变，如果发生改变，则就是MultipartHttpServletRequest
                 multipartRequestParsed = (processedRequest != request);
-
                 // Determine handler for the current request.
+                // 根据request信息寻找对应的Handler
                 mappedHandler = getHandler(processedRequest);
                 if (mappedHandler == null) {
+                    // 如果找不着相应的mappedHandler，就会报错
                     noHandlerFound(processedRequest, response);
                     return;
                 }
 
                 // Determine handler adapter for the current request.
+                //根据当前的handler寻找对应的HandlerAdapter
                 HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
                 // Process last-modified header, if supported by the handler.
@@ -1074,12 +1078,12 @@ public class DispatcherServlet extends FrameworkServlet {
                         return;
                     }
                 }
-
+                // 执行请求之前，调用拦截器前置处理。
                 if (!mappedHandler.applyPreHandle(processedRequest, response)) {
                     return;
                 }
 
-                // Actually invoke the handler.
+                // 真正的激活handler并返回视图
                 mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
                 if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1087,6 +1091,7 @@ public class DispatcherServlet extends FrameworkServlet {
                 }
 
                 applyDefaultViewName(processedRequest, mv);
+                // 执行请求之后，调用拦截器的后置处理
                 mappedHandler.applyPostHandle(processedRequest, response, mv);
             } catch (Exception ex) {
                 dispatchException = ex;
@@ -1118,6 +1123,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
     /**
      * Do we need view name translation?
+     * 视图名称转换应用于馆要添加前缀后缀的情况
      */
     private void applyDefaultViewName(HttpServletRequest request, @Nullable ModelAndView mv) throws Exception {
         if (mv != null && !mv.hasView()) {
@@ -1151,6 +1157,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
         // Did the handler return a view to render?
         if (mv != null && !mv.wasCleared()) {
+            // 处理页面跳转
             render(mv, request, response);
             if (errorView) {
                 WebUtils.clearErrorRequestAttributes(request);
@@ -1167,6 +1174,7 @@ public class DispatcherServlet extends FrameworkServlet {
         }
 
         if (mappedHandler != null) {
+            // 完成处理激活触发器
             mappedHandler.triggerAfterCompletion(request, response, null);
         }
     }
@@ -1383,6 +1391,7 @@ public class DispatcherServlet extends FrameworkServlet {
         String viewName = mv.getViewName();
         if (viewName != null) {
             // We need to resolve the view name.
+            // 解析视图
             view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
             if (view == null) {
                 throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
@@ -1405,6 +1414,7 @@ public class DispatcherServlet extends FrameworkServlet {
             if (mv.getStatus() != null) {
                 response.setStatus(mv.getStatus().value());
             }
+            // 处理页面跳转
             view.render(mv.getModelInternal(), request, response);
         } catch (Exception ex) {
             if (logger.isDebugEnabled()) {
